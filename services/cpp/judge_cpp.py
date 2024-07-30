@@ -40,7 +40,7 @@ def judge_cpp(code: str, pid: str):
                 testcase_count = testcase_count + 1
                 max_run_time = max(max_run_time, result['run_time'])
                 max_memory_usage = max(max_memory_usage, result['memory_usage'])
-                if (result['status']) == 'WA':
+                if result['status'] == 'WA':
                     return {
                         "status": "Wrong Answer",
                         "max_run_time": max_run_time,
@@ -62,10 +62,17 @@ def judge_cpp(code: str, pid: str):
                         "max_memory_usage": max_memory_usage,
                         "message": 'none'
                     }
+                if result['status'] == 'AC':
+                    return {
+                        "status": "Accept",
+                        "max_run_time": max_run_time,
+                        "max_memory_usage": max_memory_usage,
+                        "message": 'none'
+                    }
         except S3Error as err:
             print(err)
         return {
-            "status": "Accept",
+            "status": "UKE",
             "max_run_time": max_run_time,
             "max_memory_usage": max_memory_usage,
             "message": 'none'

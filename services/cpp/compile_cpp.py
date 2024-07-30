@@ -2,6 +2,7 @@ import os
 import subprocess
 import tempfile
 
+
 def compile_cpp(code: str):
     base_dir = os.path.dirname(os.path.abspath(__file__))
     with tempfile.NamedTemporaryFile(mode='w+', suffix='.cpp', delete=False) as tmp:
@@ -13,5 +14,9 @@ def compile_cpp(code: str):
     except subprocess.CalledProcessError as e:
         return {
             "status": "CE",
-            "error_message": e.stderr.strip()
+            "message": e.stderr.strip()
         }
+    return {
+        "status": "OK",
+        "message": "none"
+    }
