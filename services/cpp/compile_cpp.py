@@ -12,6 +12,6 @@ def compile_cpp(code: str):
         subprocess.run(compile_command, check=True, capture_output=True, text=True)
     except subprocess.CalledProcessError as e:
         return {
-            "status": "Compile Error",
+            "status": "CE",
             "error_message": e.stderr.strip()
         }

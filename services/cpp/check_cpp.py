@@ -6,11 +6,13 @@ import psutil
 import tempfile
 from contextlib import contextmanager
 
+
 # 定义信号处理器来处理超时
 @contextmanager
 def time_limit(milliseconds):
     def signal_handler(signum, frame):
         raise TimeoutError("Time Limit Exceeded")
+
     # 设置信号处理器
     signal.signal(signal.SIGALRM, signal_handler)
     signal.alarm(milliseconds // 1000)  # 将毫秒转换为秒
@@ -23,7 +25,7 @@ def time_limit(milliseconds):
         signal.alarm(0)
 
 
-def test(std_input_content, std_output_content, time_limit_ms, memory_limit_kb):
+def check(std_input_content, std_output_content, time_limit_ms, memory_limit_kb):
     base_dir = os.path.dirname(os.path.abspath(__file__))
     run_start_time = time.time()
     run_command = [os.path.join(base_dir, 'tmp.out')]
@@ -65,12 +67,11 @@ def test(std_input_content, std_output_content, time_limit_ms, memory_limit_kb):
                 "memory_usage": memory_usage_kb
             }
 
-        proc.wait()  # 等待进程结束
+        exit_code = proc.wait()  # 等待进程结束
         run_end_time = time.time()
 
     # 清理临时文件
     cur_output_file_path = cur_output_file.name
-
 
     # 读取临时文件的内容
     with open(cur_output_file_path, 'r') as f_cur_output:
@@ -80,14 +81,23 @@ def test(std_input_content, std_output_content, time_limit_ms, memory_limit_kb):
     cur_output_data = cur_output_data.replace('\r\n', '\n')
     std_output_data = std_output_data.replace('\r\n', '\n')
 
+    if exit_code != 0:
+        # RunTimeError
+        return {
+            "status": "RE",
+            "run_time": run_end_time - run_start_time,
+            "memory_usage": memory_usage_kb
+        }
+
     if cur_output_data == std_output_data:
+        # Accept
         return {
             "status": "AC",
             "run_time": run_end_time - run_start_time,
             "memory_usage": memory_usage_kb
         }
     else:
-        print(std_input_content);
+        # WrongAnswer
         return {
             "status": "WA",
             "run_time": run_end_time - run_start_time,
