@@ -72,7 +72,7 @@ def judge_cpp(code: str, pid: str):
         except S3Error as err:
             print(err)
         return {
-            "status": "UKE",
+            "status": "Runtime Error",
             "max_run_time": max_run_time,
             "max_memory_usage": max_memory_usage,
             "message": 'none'
