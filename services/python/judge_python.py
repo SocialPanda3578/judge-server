@@ -1,3 +1,4 @@
+import tempfile
 from services.python import check_python
 from minio import Minio
 from minio.error import S3Error
@@ -7,8 +8,9 @@ def judge_python(code: str, pid: str):
     max_run_time = 0
     max_memory_usage = 0
     testcase_count = 0
-    with open('tmp.py', 'w') as tmp:
+    with tempfile.NamedTemporaryFile(mode='w+', delete=False) as tmp:
         tmp.write(code)
+        tmp_code_path = tmp.name
     # minio
     client = Minio(
         '127.0.0.1:9000',  # MinIO服务器的URL
@@ -28,7 +30,7 @@ def judge_python(code: str, pid: str):
                 std_input_file_data = data.read().decode('utf-8')  # 读取标准输入内容
                 data = client.get_object('problems', std_output_file)
                 std_output_file_data = data.read().decode('utf-8')  # 读取标准输出内容
-                result = check_python.check(std_input_file_data, std_output_file_data, 1000, 10000000)  # 提交测试
+                result = check_python.check(tmp_code_path, std_input_file_data, std_output_file_data, 1000, 10000000)  # 提交测试
                 testcase_count = testcase_count + 1  # 测试点计数器+1
                 max_run_time = max(max_run_time, result['run_time'])  # 计算最大运行时间
                 max_memory_usage = max(max_memory_usage, result['memory_usage'])  # 计算最大内存占用
