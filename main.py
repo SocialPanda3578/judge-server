@@ -14,9 +14,11 @@ app.add_middleware(
 
 app.include_router(api_judge, prefix="/services", tags=["services API"])
 
-@app.get("/check" , tags=["check API"])
+
+@app.get("/check", tags=["check API"])
 async def check():
     return {"isOnline": "true"}
+
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="192.168.137.10", port=8001, reload=True)
