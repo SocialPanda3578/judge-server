@@ -17,6 +17,6 @@ Python 3.8
 #### 运行
 安装FastAPI，Minio包之后
 ```
-Python main.py
+python main.py
 ```
 启动服务器
