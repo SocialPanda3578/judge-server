@@ -5,7 +5,7 @@ import tempfile
 
 def compile_cpp(code: str):
     base_dir = os.path.dirname(os.path.abspath(__file__))
-    with tempfile.NamedTemporaryFile(mode='w+', suffix='.CPP23_normal', delete=False) as tmp:
+    with tempfile.NamedTemporaryFile(mode='w+', suffix='.cpp', delete=False) as tmp:
         code_file = tmp.name
         tmp.write(code)
     compile_command = ['g++', '-std=c++23', code_file, '-o', os.path.join(base_dir, 'runner.out')]

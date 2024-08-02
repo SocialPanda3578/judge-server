@@ -25,7 +25,7 @@ def time_limit(milliseconds):
         signal.alarm(0)
 
 
-def check(std_input_content, std_output_content, time_limit_ms, memory_limit_kb):
+def run(std_input_content, std_output_content, time_limit_ms, memory_limit_kb):
     base_dir = os.path.dirname(os.path.abspath(__file__))
     run_start_time = time.time()
     run_command = [os.path.join(base_dir, 'runner.out')]

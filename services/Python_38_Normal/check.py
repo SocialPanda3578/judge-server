@@ -25,7 +25,7 @@ def time_limit(milliseconds):
         signal.alarm(0)
 
 
-def check(runner_path, std_input_content, std_output_content, time_limit_ms, memory_limit_kb):
+def run(runner_path, std_input_content, std_output_content, time_limit_ms, memory_limit_kb):
     run_start_time = time.time()
 
     # 创建一个临时文件用于保存程序的当前输出

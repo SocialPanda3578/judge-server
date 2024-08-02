@@ -1,5 +1,5 @@
 from minio import Minio
-from services.java21_normal import check, compile
+from services.Java_21_Normal import check, compile
 from minio.error import S3Error
 
 
@@ -35,7 +35,7 @@ def judge_java(code: str, pid: str,client: Minio):
                 std_input_file_data = data.read().decode('utf-8')  # 读取标准输入内容
                 data = client.get_object('problems', std_output_file)
                 std_output_file_data = data.read().decode('utf-8')  # 读取标准输出内容
-                result = check.check(std_input_file_data, std_output_file_data, 1000, 10000000)  # 提交测试
+                result = check.run(std_input_file_data, std_output_file_data, 1000, 10000000)  # 提交测试
                 testcase_count = testcase_count + 1  # 测试点计数器+1
                 max_run_time = max(max_run_time, result['run_time'])  # 计算最大运行时间
                 max_memory_usage = max(max_memory_usage, result['memory_usage'])  # 计算最大内存占用
