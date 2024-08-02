@@ -12,12 +12,13 @@ def compile_cpp(code: str):
     try:
         subprocess.run(compile_command, check=True, capture_output=True, text=True)
         os.remove(code_file)
+        return {
+            "status": "OK",
+            "message": "null"
+        }
     except subprocess.CalledProcessError as e:
+        os.remove(code_file)
         return {
             "status": "CE",
             "message": e.stderr.strip()
         }
-    return {
-        "status": "OK",
-        "message": "null"
-    }

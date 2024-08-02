@@ -5,6 +5,7 @@ from fastapi import APIRouter
 from minio import Minio
 from pydantic import BaseModel
 from services.cpp import judge_cpp
+from services.java import judge_java
 from services.python import judge_python
 
 api_judge = APIRouter()
@@ -32,4 +33,6 @@ async def judge(request: CodeEvaluationRequest):
         res = judge_cpp.judge_cpp(code, pid, client)
     if language == "python":
         res = judge_python.judge_python(code, pid, client)
+    if language == "java":
+        res = judge_java.judge_java(code, pid, client)
     return {'status': 'OK', 'result': res}
