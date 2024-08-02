@@ -5,7 +5,7 @@ import tempfile
 
 def compile_java(code: str):
 
-    code_file = os.path.join(tempfile.gettempdir(), 'Main.java')
+    code_file = 'Main.java'
     with open(code_file, 'w') as tmp:
         tmp.write(code)
 
