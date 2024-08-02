@@ -17,7 +17,7 @@ async def judge(request: CodeEvaluationRequest):
     code = request.code
     language = request.language
     pid = request.pid
-    res = 'ERROR'
+    res = 'Not Support Language'
     if language == "cpp":
         res = judge_cpp.judge_cpp(code, pid)
     if language == "python":
