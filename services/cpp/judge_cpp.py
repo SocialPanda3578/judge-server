@@ -18,7 +18,8 @@ def judge_cpp(code: str, pid: str):
             "max_run_time": max_run_time,
             "max_memory_usage": max_memory_usage,
             "message": message,
-            "testcase_count": testcase_count
+            "testcase_count": testcase_count,
+            "result_queue": result_queue
         }
     # minio
     client = Minio(
@@ -83,5 +84,6 @@ def judge_cpp(code: str, pid: str):
         "max_run_time": max_run_time,
         "max_memory_usage": max_memory_usage,
         "message": message,
-        "testcase_count": testcase_count
+        "testcase_count": testcase_count,
+        "result_queue": result_queue
     }

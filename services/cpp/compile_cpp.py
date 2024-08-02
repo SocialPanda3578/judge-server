@@ -18,5 +18,5 @@ def compile_cpp(code: str):
         }
     return {
         "status": "OK",
-        "message": "none"
+        "message": "null"
     }
