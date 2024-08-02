@@ -33,7 +33,7 @@ def check(std_input_content, std_output_content, time_limit_ms, memory_limit_kb)
     # 创建一个临时文件用于保存程序的当前输出
     with tempfile.NamedTemporaryFile(mode='w+', delete=False) as cur_output_file:
         # 使用subprocess.PIPE来创建输入输出管道
-        run_command = ['java','Main']
+        run_command = ['java21_normal','Main']
         proc = subprocess.Popen(run_command, stdin=subprocess.PIPE, stdout=cur_output_file, stderr=subprocess.PIPE)
 
         # 将标准输入内容写入stdin
@@ -81,7 +81,6 @@ def check(std_input_content, std_output_content, time_limit_ms, memory_limit_kb)
     std_output_data = std_output_content.strip()
     cur_output_data = cur_output_data.replace('\r\n', '\n')
     std_output_data = std_output_data.replace('\r\n', '\n')
-    print(cur_output_data)
 
     if exit_code != 0:
         # RunTimeError
