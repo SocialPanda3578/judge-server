@@ -6,7 +6,6 @@ import tempfile
 def compile_java(code: str):
     base_dir = os.path.dirname(os.path.abspath(__file__))
 
-    # 使用固定的临时文件名 'runner.java'，用于存放Java源代码
     code_file = 'Main.java'
 
     # 写入Java源代码到临时文件
