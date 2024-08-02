@@ -81,7 +81,7 @@ def check(std_input_content, std_output_content, time_limit_ms, memory_limit_kb)
     std_output_data = std_output_content.strip()
     cur_output_data = cur_output_data.replace('\r\n', '\n')
     std_output_data = std_output_data.replace('\r\n', '\n')
-
+    print(cur_output_data)
 
     if exit_code != 0:
         # RunTimeError
