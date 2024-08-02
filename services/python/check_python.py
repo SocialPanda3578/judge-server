@@ -25,13 +25,13 @@ def time_limit(milliseconds):
         signal.alarm(0)
 
 
-def check(tmp_code_path, std_input_content, std_output_content, time_limit_ms, memory_limit_kb):
+def check(runner_path, std_input_content, std_output_content, time_limit_ms, memory_limit_kb):
     run_start_time = time.time()
 
     # 创建一个临时文件用于保存程序的当前输出
     with tempfile.NamedTemporaryFile(mode='w+', delete=False) as cur_output_file:
         # 使用subprocess.PIPE来创建输入输出管道
-        proc = subprocess.Popen(['python3.8', tmp_code_path], stdin=subprocess.PIPE, stdout=cur_output_file, stderr=subprocess.PIPE)
+        proc = subprocess.Popen(['python3.8', runner_path], stdin=subprocess.PIPE, stdout=cur_output_file, stderr=subprocess.PIPE)
 
         # 将标准输入内容写入stdin
         proc.stdin.write(std_input_content.encode())

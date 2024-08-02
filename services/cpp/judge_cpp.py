@@ -7,14 +7,18 @@ def judge_cpp(code: str, pid: str):
     max_run_time = 0
     max_memory_usage = 0
     testcase_count = 0
+    final_status = 'judging'
+    result_queue = ''
     # compile
     compile_result = compile_cpp.compile_cpp(code)  # 提交编译
+    message = compile_result['message'],
     if compile_result['status'] == 'CE':  # 编译错误
         return {
             "status": "Compile Error",
             "max_run_time": max_run_time,
             "max_memory_usage": max_memory_usage,
-            "message": compile_result['message']
+            "message": message,
+            "testcase_count": testcase_count
         }
     # minio
     client = Minio(
@@ -39,45 +43,45 @@ def judge_cpp(code: str, pid: str):
                 testcase_count = testcase_count + 1  # 测试点计数器+1
                 max_run_time = max(max_run_time, result['run_time'])  # 计算最大运行时间
                 max_memory_usage = max(max_memory_usage, result['memory_usage'])  # 计算最大内存占用
-                if result['status'] == 'WA':  # 答案错误
-                    return {
-                        "status": "Wrong Answer",
-                        "max_run_time": max_run_time,
-                        "max_memory_usage": max_memory_usage,
-                        "message": 'none'
-                    }
-                if result['status'] == 'TLE':  # 运行超时
-                    print('TLE')
-                    return {
-                        "status": "Time Limit Exceeded",
-                        "max_run_time": max_run_time,
-                        "max_memory_usage": max_memory_usage,
-                        "message": 'none'
-                    }
-                if result['status'] == 'MLE':  # 内存超限
-                    return {
-                        "status": "Memory Limit Exceeded",
-                        "max_run_time": max_run_time,
-                        "max_memory_usage": max_memory_usage,
-                        "message": 'none'
-                    }
-                if result['status'] == 'AC':  # 答案正确
-                    return {
-                        "status": "Accept",
-                        "max_run_time": max_run_time,
-                        "max_memory_usage": max_memory_usage,
-                        "message": 'none'
-                    }
+                # 答案错误
+                if result['status'] == 'WA':
+                    result_queue += 'W'
+                    if final_status == 'judging':
+                        final_status = 'Wrong Answer'
+                # 运行超时
+                if result['status'] == 'TLE':
+                    result_queue += 'T'
+                    if final_status == 'judging':
+                        final_status = 'Time Limit Exceeded'
+                # 内存超限
+                if result['status'] == 'MLE':
+                    result_queue += 'M'
+                    if final_status == 'judging':
+                        final_status = 'Memory Limit Exceeded'
+                # 运行时错误
+                if result['status'] == 'RE':
+                    result_queue += 'R'
+                    if final_status == 'judging':
+                        final_status = 'Runtime Error'
+                # 答案正确
+                if result['status'] == 'AC':
+                    result_queue += 'A'
         except S3Error as err:
-            print(err)
-        return {
-            "status": "Runtime Error",  # 运行时错误
-            "max_run_time": max_run_time,
-            "max_memory_usage": max_memory_usage,
-            "message": 'none'
-        }
-    except Exception as e:
-        return {
-            "status": "Server Error",  # 服务器错误
-            "message": str(e)
-        }
+            # minio错误
+            final_status = 'Minio Error'
+            message = str(err)
+    except Exception as err:
+        # 服务器错误
+        final_status = 'Server Error'
+        message = str(err)
+
+    # 判断最终返回值
+    if final_status == 'judging':
+        final_status = 'Accept'
+    return {
+        "status": final_status,
+        "max_run_time": max_run_time,
+        "max_memory_usage": max_memory_usage,
+        "message": message,
+        "testcase_count": testcase_count
+    }
