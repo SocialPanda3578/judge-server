@@ -1,24 +1,24 @@
 import os
 import tempfile
-from services.python import check_python
+
 from minio import Minio
+
+from services.python import check_python
 from minio.error import S3Error
 
 
-def judge_python(code: str, pid: str):
+def judge_python(code: str, pid: str, client: Minio):
     max_run_time = 0
     max_memory_usage = 0
     testcase_count = 0
+    re_count = mle_count = tle_count = wa_count = ac_count = 0
+    final_status = 'judging'
+    result_queue = ''
+    message = 'null'
     with tempfile.NamedTemporaryFile(mode='w+', delete=False) as tmp:
         tmp.write(code)
         runner_path = tmp.name
-    # minio
-    client = Minio(
-        '127.0.0.1:9000',  # MinIO服务器的URL
-        access_key='minioadmin',  # MinIO访问密钥
-        secret_key='minioadmin',  # MinIO秘密密钥
-        secure=False  # 如果是HTTPS连接设置为True
-    )
+
     try:
         # minio
         try:
@@ -35,45 +35,51 @@ def judge_python(code: str, pid: str):
                 testcase_count = testcase_count + 1  # 测试点计数器+1
                 max_run_time = max(max_run_time, result['run_time'])  # 计算最大运行时间
                 max_memory_usage = max(max_memory_usage, result['memory_usage'])  # 计算最大内存占用
-                if result['status'] == 'WA':  # 答案错误
-                    return {
-                        "status": "Wrong Answer",
-                        "max_run_time": max_run_time,
-                        "max_memory_usage": max_memory_usage,
-                        "message": 'none'
-                    }
-                if result['status'] == 'TLE':  # 运行超时
-                    print('TLE')
-                    return {
-                        "status": "Time Limit Exceeded",
-                        "max_run_time": max_run_time,
-                        "max_memory_usage": max_memory_usage,
-                        "message": 'none'
-                    }
-                if result['status'] == 'MLE':  # 内存超限
-                    return {
-                        "status": "Memory Limit Exceeded",
-                        "max_run_time": max_run_time,
-                        "max_memory_usage": max_memory_usage,
-                        "message": 'none'
-                    }
-                if result['status'] == 'AC':  # 答案正确
-                    return {
-                        "status": "Accept",
-                        "max_run_time": max_run_time,
-                        "max_memory_usage": max_memory_usage,
-                        "message": 'none'
-                    }
+                # 答案错误
+                if result['status'] == 'WA':
+                    result_queue += 'W'
+                    wa_count += 1
+                # 运行超时
+                if result['status'] == 'TLE':
+                    result_queue += 'T'
+                    tle_count += 1
+                # 内存超限
+                if result['status'] == 'MLE':
+                    result_queue += 'M'
+                    mle_count += 1
+                # 运行时错误
+                if result['status'] == 'RE':
+                    result_queue += 'R'
+                    re_count += 1
+                # 答案正确
+                if result['status'] == 'AC':
+                    result_queue += 'A'
+                    ac_count += 1
         except S3Error as err:
-            print(err)
-        return {
-            "status": "Runtime Error",  # 运行时错误
-            "max_run_time": max_run_time,
-            "max_memory_usage": max_memory_usage,
-            "message": 'none'
-        }
-    except Exception as e:
-        return {
-            "status": "Server Error",  # 服务器错误
-            "message": str(e)
-        }
+            # minio错误
+            final_status = 'Minio Error'
+            message = str(err)
+    except Exception as err:
+        # 服务器错误
+        final_status = 'Server Error'
+        message = str(err)
+
+    # 判断最终返回值
+    os.remove(runner_path)
+    if testcase_count == 0:
+        final_status = 'Judge Error'
+    if final_status == 'judging':
+        if re_count > 0: final_status = 'Runtime Error'
+        elif wa_count > 0: final_status = 'Wrong Answer'
+        elif tle_count > 0: final_status = 'Time Limit Exceeded'
+        elif mle_count > 0: final_status = 'Memory Limit Exceeded'
+        elif ac_count == testcase_count: final_status = 'Accept'
+        else: final_status = 'Server Error'
+    return {
+        "status": final_status,
+        "max_run_time": max_run_time,
+        "max_memory_usage": max_memory_usage,
+        "message": message,
+        "testcase_count": testcase_count,
+        "result_queue": result_queue
+    }

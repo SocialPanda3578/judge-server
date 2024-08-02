@@ -28,7 +28,7 @@ def time_limit(milliseconds):
 def check(std_input_content, std_output_content, time_limit_ms, memory_limit_kb):
     base_dir = os.path.dirname(os.path.abspath(__file__))
     run_start_time = time.time()
-    run_command = [os.path.join(base_dir, 'tmp.out')]
+    run_command = [os.path.join(base_dir, 'runner.out')]
 
     # 创建一个临时文件用于保存程序的当前输出
     with tempfile.NamedTemporaryFile(mode='w+', delete=False) as cur_output_file:

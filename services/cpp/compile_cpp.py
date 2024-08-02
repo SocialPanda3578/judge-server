@@ -8,9 +8,10 @@ def compile_cpp(code: str):
     with tempfile.NamedTemporaryFile(mode='w+', suffix='.cpp', delete=False) as tmp:
         code_file = tmp.name
         tmp.write(code)
-    compile_command = ['g++', '-std=c++23', code_file, '-o', os.path.join(base_dir, 'tmp.out')]
+    compile_command = ['g++', '-std=c++23', code_file, '-o', os.path.join(base_dir, 'runner.out')]
     try:
         subprocess.run(compile_command, check=True, capture_output=True, text=True)
+        os.remove(code_file)
     except subprocess.CalledProcessError as e:
         return {
             "status": "CE",

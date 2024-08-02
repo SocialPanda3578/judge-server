@@ -1,12 +1,13 @@
-from services.cpp import check_cpp, compile_cpp
 from minio import Minio
+from services.cpp import check_cpp, compile_cpp
 from minio.error import S3Error
 
 
-def judge_cpp(code: str, pid: str):
+def judge_cpp(code: str, pid: str,client: Minio):
     max_run_time = 0
     max_memory_usage = 0
     testcase_count = 0
+    re_count = mle_count = tle_count = wa_count = ac_count = 0
     final_status = 'judging'
     result_queue = ''
     # compile
@@ -21,13 +22,7 @@ def judge_cpp(code: str, pid: str):
             "testcase_count": testcase_count,
             "result_queue": result_queue
         }
-    # minio
-    client = Minio(
-        '127.0.0.1:9000',  # MinIO服务器的URL
-        access_key='minioadmin',  # MinIO访问密钥
-        secret_key='minioadmin',  # MinIO秘密密钥
-        secure=False  # 如果是HTTPS连接设置为True
-    )
+
     try:
         # minio
         try:
@@ -47,26 +42,23 @@ def judge_cpp(code: str, pid: str):
                 # 答案错误
                 if result['status'] == 'WA':
                     result_queue += 'W'
-                    if final_status == 'judging':
-                        final_status = 'Wrong Answer'
+                    wa_count += 1
                 # 运行超时
                 if result['status'] == 'TLE':
                     result_queue += 'T'
-                    if final_status == 'judging':
-                        final_status = 'Time Limit Exceeded'
+                    tle_count += 1
                 # 内存超限
                 if result['status'] == 'MLE':
                     result_queue += 'M'
-                    if final_status == 'judging':
-                        final_status = 'Memory Limit Exceeded'
+                    mle_count += 1
                 # 运行时错误
                 if result['status'] == 'RE':
                     result_queue += 'R'
-                    if final_status == 'judging':
-                        final_status = 'Runtime Error'
+                    re_count += 1
                 # 答案正确
                 if result['status'] == 'AC':
                     result_queue += 'A'
+                    ac_count+=1
         except S3Error as err:
             # minio错误
             final_status = 'Minio Error'
@@ -77,8 +69,15 @@ def judge_cpp(code: str, pid: str):
         message = str(err)
 
     # 判断最终返回值
+    if testcase_count == 0:
+        final_status = 'Judge Error'
     if final_status == 'judging':
-        final_status = 'Accept'
+        if re_count > 0: final_status = 'Runtime Error'
+        elif wa_count > 0: final_status = 'Wrong Answer'
+        elif tle_count > 0: final_status = 'Time Limit Exceeded'
+        elif mle_count > 0: final_status = 'Memory Limit Exceeded'
+        elif ac_count == testcase_count: final_status = 'Accept'
+        else: final_status = 'Server Error'
     return {
         "status": final_status,
         "max_run_time": max_run_time,
